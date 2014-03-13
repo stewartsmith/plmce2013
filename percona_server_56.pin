@@ -1,0 +1,315 @@
+#!/usr/bin/env pinpoint
+
+[black]
+[text-align=center]
+[font=Sans 70px]
+[duration=35.000000]
+--
+Percona Server 5.6
+
+
+Stewart Smith
+Percona
+# Hi!
+# I work for
+
+-- [percona-logo.jpg]
+
+# which is a MySQL support, consulting and development company
+# you may have heard of
+
+--
+Director of Server Development
+# So I'm totally biased. Feel free to take some grains of salt.
+
+--
+What is Percona Server?
+# "branch" of MySQL. Not as different as MariaDB.
+# closely track upstream. Within 30 days.
+# we base on the Oracle release, add our own patchset
+# performance, usability and managability improvements
+
+--
+What was Percona Server 5.1?
+# performance!
+# management!
+# A very mature and stable DB now.
+# will continue to be maintained.
+# but only as there is direct customer requests.
+# Accounts for very small %age of downloads.
+# if using, plan to transition to PS 5.5 soon.
+# We'll always support you though.
+
+--
+Percona Server 5.5
+# is now stable, reliable, performant
+# took a long time to get to market
+# obviously we didn't want this for PS 5.6
+
+--
+Process changes
+# since early days of Percona Server we've made many changes
+# to development processes at Percona
+# to help ensure quality
+
+--
+Most advanced dev+test processes
+# of any MySQL server variant (including MySQL itself)
+# I feel pretty confident in saying this.
+
+--
+tick-tock releases
+# Tick: upgrade to latest upstream MySQL release
+# Tock: Percona added bug fixes to our own code and upstream
+
+--
+Gated trunk
+# Idea is nobody ever pushes directly
+# People suck at verifying software
+# You can actually link benchmark+test runs to merges
+# automated audit trail
+# trunk always builds and works.
+
+--
+Auto-deploy documentation
+# after push to trunk
+# build docs
+# push to web server
+# bug fixes to docs can be seen very quickly
+
+--
+Performance regression tests
+# nightly performance regression tests
+# staging performance regression tests
+# no code hits trunk that destroys performance
+
+-- [ps55delay.png]
+
+# has helped, at same time improving quality
+
+-- [ps51delay.png]
+
+# much more visible with 5.1 version (longer history)
+
+--
+Expect more of the same with 5.6
+
+--
+First:
+
+MySQL 5.6
+# Not really going to talk about it
+# Honest opinion: best MySQL release so far.
+--
+Stewart's dot twenty rule
+# all software is annoying until point release .20
+# generally a good rule.
+--
+MySQL 5.6.11
+# There will be a bunch more bug fixes coming in.
+--
+Changes in PS 5.6
+
+--
+No HandlerSocket
+# probably not what you want anyway.
+# We'll see if HS gues upgrade to 5.6
+
+--
+fast_index_creation
+# server option is replaced by MySQL 5.6 functionality
+
+--
+MySQL 5.6
+
+ALGORITHM= [DEFAULT|INPLACE|COPY]
+
+--
+SHOW -> INFORMATION_SCHEMA
+# At least for temporary tables, now just available via I_S
+# Move away from SHOW and towards I_S.
+# decreases maintenance, increases modularity and compatibility.
+
+--
+Out: InnoDB timer based concurrency throttling
+
+--
+Out: InnoDB recovery stats
+
+--
+SHOW INNODB STATUS
+Oldest View
+
+replaced by:
+I_S.XTRADB_READ_VIEW
+
+--
+XtraDB specific I_S tables prefixed with XTRADB_
+# easier for people to keep track of compatibility
+
+--
+SHOW INNODB STATUS hash tables
+
+replaced by:
+I_S.XTRADB_INTERNAL_HASH_TABLES
+
+--
+INNODB_RSEG -> XTRADB_RSEG
+# Maybe small pain for some users now, benefit in long run
+
+--
+PS features now in MySQL 5.6
+# Some features in PS 5.5 have been implemented by Oracle
+# Where sensible, we prefer to take the Oracle implementation,
+# possibly improving upon it.
+
+--
+SHOW ENGINE INNODB MUTEX
+
+replaced by:
+PERFORMANCE_SCHEMA
+
+--
+Crash resistant replication
+# now the MySQL implementations
+
+--
+InnoDB I/O Scalability
+# Some of our patches no longer relevant
+# We're making our own improvements to InnoDB scalability though
+# in different places than before.
+
+--
+InnoDB data dictonary limits
+# replaced with MySQL implementation. In PS first.
+
+--
+InnoDB data dictionary I_S tables
+# replaced with MySQL ones. Near identical. In PS first.
+
+--
+XtraDB SYS_STATS persistent table statistics
+# replaced with MySQL impl. In PS first
+
+--
+Dump/restore buffer pool
+# MySQL implementation. In PS first
+#
+# So, Let's go onto things that are more PS specific new tihngs
+
+--
+PS 5.6 Features
+
+--
+PAM Plugin
+# bringing this forward to 5.6
+# any PAM authentication method
+
+--
+User and table statistics
+# still the simplest performance monitoring interface
+
+--
+Extended slow query log
+# we have plans to convert it into a much more efficient plugin
+# After initial PS5.6 GA. Prototype available now
+
+--
+Thread pool
+# from MariaDB
+
+--
+XtraDB
+# moving from performance to features
+
+-- [duration=6.441387]
+InnoDB kill idle transactions
+# keeping from PS 5.5
+# long running txn blocks purge
+# prevents that
+
+-- [duration=36.580673]
+InnoDB fake changes
+# still great way of keeping slave cache warm
+# combined with Percona Playback, this is pretty special
+
+-- [duration=53.403423]
+Incremental Backup
+# Currently entirely XtraBackup based
+# We record LSN on full backup
+# for incremental, scan each page in file.
+
+-- [duration=25.745575]
+Scan full tablespace
+=
+SLOW
+
+-- [duration=28.650415]
+Log archiving
+# archive InnoDB redo logs, ship them off somewhere
+# replay them against full backup
+# presto: incremental backup at near zero cost on master
+
+-- [duration=2.580399]
+Archive REDO
+
+Replay REDO
+
+-- [duration=16.191893]
+Advantage: low overhead
+# for backing up
+
+-- [duration=45.795872]
+Disadvantage: longer prepare
+# but you can be near up-to-the-minute
+# theoretically we could have this work against mysqld. Contact us
+
+-- [duration=98.237389]
+Bitmap based incremental backups
+# Another XtraDB feature
+# When we change a page, set a bit in a bitmap.
+# For incremental backup, we just read those pages.
+# Bitmap index of changed pages
+# Backup only those pages rather than full scan of data files
+# apply is linear scan writing pages.
+
+-- [duration=11.583460]
+What is Percona Server 5.6 about?
+
+-- [duration=29.346680]
+Evolution
+not
+Revolution
+# We're evolving what was in PS 5.5
+# and evolving what's in MySQL 5.6
+# to greate something that's suitable for
+# Change the world but only in a way that's immediately useful
+
+-- [duration=30.207094]
+Percona Server 5.6
+
+for real production environments
+# bug fixes, performance improvements and features
+# that make living with MySQL easier.
+--
+First release: August 2012
+--
+Current: March 2013
+
+Percona Server 5.6.10-60.2
+--
+Next release: May 2013
+# will incorporate most of the PS 5.5 features
+-- [font=Sans 100px] [transition=spin-text] [duration=1.999192]
+Thank you.
+
+-- [duration=7.874017]
+Stewart Smith
+@stewartsmith
+
+stewart.smith@percona.com
+
+At the Percona booth (now)
+
+--
+
